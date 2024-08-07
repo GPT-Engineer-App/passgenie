@@ -1,34 +1,88 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { QRCodeSVG } from 'qrcode.react';
+import { Checkbox } from "@/components/ui/checkbox"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
+  const navigate = useNavigate();
   const [passData, setPassData] = useState({
     title: '',
     issuerName: '',
+    cardNumber: '',
+    expirationDate: '',
+    cardholderName: '',
+    cvv: '',
     logo: '',
     heroImage: '',
     description: '',
     backgroundColor: '#FFFFFF',
     textColor: '#000000',
-    qrCodeUrl: '',
+    frontImage: null,
+    backImage: null,
+    additionalInfo: '',
   });
 
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [qrCodeType, setQrCodeType] = useState('standard');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const frontImageRef = useRef(null);
+  const backImageRef = useRef(null);
+
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setPassData(prevData => ({ ...prevData, [name]: value }));
+    const { name, value, type, files } = e.target;
+    if (type === 'file') {
+      const file = files[0];
+      if (file) {
+        const img = new Image();
+        img.onload = function() {
+          if (this.width < 300 || this.height < 300) {
+            setErrorMessage(`The ${name === 'frontImage' ? 'front' : 'back'} image resolution is too low. Please upload a higher quality image.`);
+            e.target.value = '';
+          } else {
+            setPassData(prevData => ({ ...prevData, [name]: file }));
+            setErrorMessage('');
+          }
+        };
+        img.src = URL.createObjectURL(file);
+      }
+    } else {
+      setPassData(prevData => ({ ...prevData, [name]: value }));
+    }
+  };
+
+  const generateQRCode = () => {
+    const qrData = JSON.stringify({
+      title: passData.title,
+      cardNumber: passData.cardNumber,
+      expirationDate: passData.expirationDate,
+      cardholderName: passData.cardholderName,
+    });
+    return qrData;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Here you would typically send the data to a backend to generate the actual pass
-    console.log('Pass data submitted:', passData);
-    // For demo purposes, we'll just alert the user
-    alert('Pass generated! (In a real app, this would download the pass)');
+    if (!privacyAgreed) {
+      alert('Please agree to the privacy statement before generating the pass.');
+      return;
+    }
+    const qrCodeData = generateQRCode();
+    const passWithQR = { ...passData, qrCodeData };
+    
+    // Save the pass data to localStorage
+    const savedPasses = JSON.parse(localStorage.getItem('savedPasses')) || [];
+    savedPasses.push(passWithQR);
+    localStorage.setItem('savedPasses', JSON.stringify(savedPasses));
+
+    alert('Pass generated and saved!');
+    navigate('/saved-passes');
   };
 
   return (
@@ -51,16 +105,32 @@ const Index = () => {
                 <Input id="issuerName" name="issuerName" value={passData.issuerName} onChange={handleInputChange} required />
               </div>
               <div>
+                <Label htmlFor="cardNumber">Card Number</Label>
+                <Input id="cardNumber" name="cardNumber" value={passData.cardNumber} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="expirationDate">Expiration Date</Label>
+                <Input id="expirationDate" name="expirationDate" type="date" value={passData.expirationDate} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="cardholderName">Cardholder Name</Label>
+                <Input id="cardholderName" name="cardholderName" value={passData.cardholderName} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="cvv">CVV</Label>
+                <Input id="cvv" name="cvv" value={passData.cvv} onChange={handleInputChange} required />
+              </div>
+              <div>
                 <Label htmlFor="logo">Logo URL</Label>
-                <Input id="logo" name="logo" type="url" value={passData.logo} onChange={handleInputChange} required />
+                <Input id="logo" name="logo" type="url" value={passData.logo} onChange={handleInputChange} />
               </div>
               <div>
                 <Label htmlFor="heroImage">Hero Image URL</Label>
-                <Input id="heroImage" name="heroImage" type="url" value={passData.heroImage} onChange={handleInputChange} required />
+                <Input id="heroImage" name="heroImage" type="url" value={passData.heroImage} onChange={handleInputChange} />
               </div>
               <div>
                 <Label htmlFor="description">Description</Label>
-                <Textarea id="description" name="description" value={passData.description} onChange={handleInputChange} required />
+                <Textarea id="description" name="description" value={passData.description} onChange={handleInputChange} />
               </div>
               <div>
                 <Label htmlFor="backgroundColor">Background Color</Label>
@@ -71,9 +141,42 @@ const Index = () => {
                 <Input id="textColor" name="textColor" type="color" value={passData.textColor} onChange={handleInputChange} required />
               </div>
               <div>
-                <Label htmlFor="qrCodeUrl">QR Code URL</Label>
-                <Input id="qrCodeUrl" name="qrCodeUrl" type="url" value={passData.qrCodeUrl} onChange={handleInputChange} placeholder="https://example.com" />
+                <Label htmlFor="frontImage">Front Image</Label>
+                <Input id="frontImage" name="frontImage" type="file" accept="image/*" onChange={handleInputChange} ref={frontImageRef} required />
               </div>
+              <div>
+                <Label htmlFor="backImage">Back Image</Label>
+                <Input id="backImage" name="backImage" type="file" accept="image/*" onChange={handleInputChange} ref={backImageRef} required />
+              </div>
+              <div>
+                <Label htmlFor="additionalInfo">Additional Information</Label>
+                <Textarea id="additionalInfo" name="additionalInfo" value={passData.additionalInfo} onChange={handleInputChange} />
+              </div>
+              <div>
+                <Label htmlFor="qrCodeType">QR Code Type</Label>
+                <select
+                  id="qrCodeType"
+                  name="qrCodeType"
+                  value={qrCodeType}
+                  onChange={(e) => setQrCodeType(e.target.value)}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="standard">Standard QR Code</option>
+                  <option value="pretty">Pretty QR Code (AI-generated)</option>
+                </select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="privacyAgreement" checked={privacyAgreed} onCheckedChange={setPrivacyAgreed} />
+                <label htmlFor="privacyAgreement" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  I understand that I am responsible for the accuracy of the information provided
+                </label>
+              </div>
+              {errorMessage && (
+                <Alert variant="destructive">
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </Alert>
+              )}
               <Button type="submit" className="w-full">Generate Pass</Button>
             </form>
           </CardContent>
@@ -91,11 +194,9 @@ const Index = () => {
               {passData.logo && <img src={passData.logo} alt="Logo" className="w-16 h-16 mb-2 mx-auto object-cover" />}
               {passData.heroImage && <img src={passData.heroImage} alt="Hero" className="w-full h-32 mb-2 mx-auto object-cover" />}
               <p className="text-sm">{passData.description || 'Pass description will appear here'}</p>
-              {passData.qrCodeUrl && (
-                <div className="mt-4">
-                  <QRCodeSVG value={passData.qrCodeUrl} size={128} className="mx-auto" />
-                </div>
-              )}
+              <div className="mt-4">
+                <QRCodeSVG value={generateQRCode()} size={128} className="mx-auto" />
+              </div>
             </div>
           </CardContent>
         </Card>
