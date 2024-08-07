@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { QRCodeSVG } from 'qrcode.react';
 
 const Index = () => {
   const [passData, setPassData] = useState({
@@ -14,6 +15,7 @@ const Index = () => {
     description: '',
     backgroundColor: '#FFFFFF',
     textColor: '#000000',
+    qrCodeUrl: '',
   });
 
   const handleInputChange = (e) => {
@@ -68,6 +70,10 @@ const Index = () => {
                 <Label htmlFor="textColor">Text Color</Label>
                 <Input id="textColor" name="textColor" type="color" value={passData.textColor} onChange={handleInputChange} required />
               </div>
+              <div>
+                <Label htmlFor="qrCodeUrl">QR Code URL</Label>
+                <Input id="qrCodeUrl" name="qrCodeUrl" type="url" value={passData.qrCodeUrl} onChange={handleInputChange} placeholder="https://example.com" />
+              </div>
               <Button type="submit" className="w-full">Generate Pass</Button>
             </form>
           </CardContent>
@@ -85,6 +91,11 @@ const Index = () => {
               {passData.logo && <img src={passData.logo} alt="Logo" className="w-16 h-16 mb-2 mx-auto object-cover" />}
               {passData.heroImage && <img src={passData.heroImage} alt="Hero" className="w-full h-32 mb-2 mx-auto object-cover" />}
               <p className="text-sm">{passData.description || 'Pass description will appear here'}</p>
+              {passData.qrCodeUrl && (
+                <div className="mt-4">
+                  <QRCodeSVG value={passData.qrCodeUrl} size={128} className="mx-auto" />
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
