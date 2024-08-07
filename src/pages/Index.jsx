@@ -86,13 +86,12 @@ const Index = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!privacyAgreed) {
       alert('Please agree to the privacy statement before generating the pass.');
       return;
     }
-    const qrCodeData = generateQRCode();
     const qrCodeData = generateQRCode();
     const prettyQrCodeData = await generatePrettyQRCode();
     const passWithQR = { ...passData, qrCodeData, prettyQrCodeData };
