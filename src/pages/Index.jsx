@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { QRCodeSVG } from 'qrcode.react';
+import QRCode from 'qrcode';
 import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useNavigate } from 'react-router-dom';
@@ -67,6 +68,24 @@ const Index = () => {
     return qrData;
   };
 
+  const generatePrettyQRCode = async () => {
+    try {
+      const qrData = generateQRCode();
+      const qrCodeDataUrl = await QRCode.toDataURL(qrData, {
+        errorCorrectionLevel: 'H',
+        margin: 1,
+        color: {
+          dark: passData.textColor,
+          light: passData.backgroundColor,
+        },
+      });
+      return qrCodeDataUrl;
+    } catch (error) {
+      console.error('Error generating pretty QR code:', error);
+      return null;
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!privacyAgreed) {
@@ -74,7 +93,9 @@ const Index = () => {
       return;
     }
     const qrCodeData = generateQRCode();
-    const passWithQR = { ...passData, qrCodeData };
+    const qrCodeData = generateQRCode();
+    const prettyQrCodeData = await generatePrettyQRCode();
+    const passWithQR = { ...passData, qrCodeData, prettyQrCodeData };
     
     // Save the pass data to localStorage
     const savedPasses = JSON.parse(localStorage.getItem('savedPasses')) || [];
@@ -195,7 +216,16 @@ const Index = () => {
               {passData.heroImage && <img src={passData.heroImage} alt="Hero" className="w-full h-32 mb-2 mx-auto object-cover" />}
               <p className="text-sm">{passData.description || 'Pass description will appear here'}</p>
               <div className="mt-4">
-                <QRCodeSVG value={generateQRCode()} size={128} className="mx-auto" />
+                {qrCodeType === 'standard' ? (
+                  <QRCodeSVG value={generateQRCode()} size={128} className="mx-auto" />
+                ) : (
+                  <img
+                    src={generatePrettyQRCode()}
+                    alt="Pretty QR Code"
+                    className="mx-auto"
+                    style={{ width: '128px', height: '128px' }}
+                  />
+                )}
               </div>
             </div>
           </CardContent>

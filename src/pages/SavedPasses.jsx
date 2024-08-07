@@ -32,11 +32,18 @@ const SavedPasses = () => {
                 {pass.logo && <img src={pass.logo} alt="Logo" className="w-16 h-16 mb-2 mx-auto object-cover" />}
                 {pass.heroImage && <img src={pass.heroImage} alt="Hero" className="w-full h-32 mb-2 mx-auto object-cover" />}
                 <p className="text-sm">{pass.description}</p>
-                {pass.qrCodeUrl && (
-                  <div className="mt-4">
-                    <QRCodeSVG value={pass.qrCodeUrl} size={128} className="mx-auto" />
-                  </div>
-                )}
+                <div className="mt-4">
+                  {pass.prettyQrCodeData ? (
+                    <img
+                      src={pass.prettyQrCodeData}
+                      alt="Pretty QR Code"
+                      className="mx-auto"
+                      style={{ width: '128px', height: '128px' }}
+                    />
+                  ) : (
+                    <QRCodeSVG value={pass.qrCodeData} size={128} className="mx-auto" />
+                  )}
+                </div>
               </div>
               <Button variant="destructive" className="mt-4 w-full" onClick={() => deletePass(index)}>
                 Delete Pass
