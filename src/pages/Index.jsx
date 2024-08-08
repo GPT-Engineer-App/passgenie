@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -32,9 +33,53 @@ const Index = () => {
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [qrCodeType, setQrCodeType] = useState('standard');
   const [errorMessage, setErrorMessage] = useState('');
+  const [nfcSupported, setNfcSupported] = useState(false);
+  const [nfcReading, setNfcReading] = useState(false);
+  const [nfcData, setNfcData] = useState(null);
 
   const frontImageRef = useRef(null);
   const backImageRef = useRef(null);
+
+  useEffect(() => {
+    if ('NDEFReader' in window) {
+      setNfcSupported(true);
+    }
+  }, []);
+
+  const startNfcScan = async () => {
+    if (!nfcSupported) {
+      setErrorMessage('NFC is not supported on this device or browser.');
+      return;
+    }
+
+    try {
+      setNfcReading(true);
+      const ndef = new NDEFReader();
+      await ndef.scan();
+
+      ndef.addEventListener("reading", ({ message, serialNumber }) => {
+        console.log(`> Serial Number: ${serialNumber}`);
+        console.log(`> Records: (${message.records.length})`);
+
+        const nfcDataObj = {
+          serialNumber,
+          records: message.records.map(record => ({
+            recordType: record.recordType,
+            mediaType: record.mediaType,
+            data: record.data
+          }))
+        };
+
+        setNfcData(nfcDataObj);
+        setNfcReading(false);
+      });
+
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(`Error reading NFC: ${error.message}`);
+      setNfcReading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -199,6 +244,24 @@ const Index = () => {
               )}
               <Button type="submit" className="w-full">Generate Pass</Button>
             </form>
+
+            {nfcSupported && (
+              <div className="mt-4">
+                <Button onClick={startNfcScan} disabled={nfcReading} className="w-full">
+                  {nfcReading ? 'Scanning NFC...' : 'Scan NFC Card'}
+                </Button>
+              </div>
+            )}
+
+            {nfcData && (
+              <Alert className="mt-4">
+                <AlertTitle>NFC Data Read</AlertTitle>
+                <AlertDescription>
+                  <pre>{JSON.stringify(nfcData, null, 2)}</pre>
+                </AlertDescription>
+              </Alert>
+            )}
+
           </CardContent>
         </Card>
         
