@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -70,6 +71,11 @@ const Index = () => {
         };
 
         setNfcData(nfcDataObj);
+        setPassData(prevData => ({
+          ...prevData,
+          cardNumber: nfcDataObj.serialNumber,
+          additionalInfo: JSON.stringify(nfcDataObj.records, null, 2)
+        }));
         setNfcReading(false);
       });
 
@@ -160,6 +166,13 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {nfcSupported && (
+                <div className="mb-4">
+                  <Button onClick={startNfcScan} disabled={nfcReading} className="w-full">
+                    {nfcReading ? 'Scanning NFC...' : 'Scan NFC Card'}
+                  </Button>
+                </div>
+              )}
               <div>
                 <Label htmlFor="title">Title</Label>
                 <Input id="title" name="title" value={passData.title} onChange={handleInputChange} required />
@@ -243,28 +256,30 @@ const Index = () => {
               )}
               <Button type="submit" className="w-full">Generate Pass</Button>
             </form>
-
-            {nfcSupported && (
-              <div className="mt-4">
-                <Button onClick={startNfcScan} disabled={nfcReading} className="w-full">
-                  {nfcReading ? 'Scanning NFC...' : 'Scan NFC Card'}
-                </Button>
-              </div>
-            )}
-
-            {nfcData && (
-              <Alert className="mt-4">
-                <AlertTitle>NFC Data Read</AlertTitle>
-                <AlertDescription>
-                  <pre>{JSON.stringify(nfcData, null, 2)}</pre>
-                </AlertDescription>
-              </Alert>
-            )}
-
           </CardContent>
         </Card>
         
-        <Card>
+        <div className="space-y-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>NFC Data</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {nfcData ? (
+                <div>
+                  <p><strong>Serial Number:</strong> {nfcData.serialNumber}</p>
+                  <p><strong>Records:</strong></p>
+                  <pre className="bg-gray-100 p-2 rounded mt-2 overflow-x-auto">
+                    {JSON.stringify(nfcData.records, null, 2)}
+                  </pre>
+                </div>
+              ) : (
+                <p>No NFC data available. Use the "Scan NFC Card" button to read an NFC card.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
           <CardHeader>
             <CardTitle>Pass Preview</CardTitle>
             <CardDescription>A simple preview of your pass</CardDescription>
