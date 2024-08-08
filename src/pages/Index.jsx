@@ -2,10 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { QRCodeSVG } from 'qrcode.react';
 import * as QRCode from 'qrcode';
 import { Checkbox } from "@/components/ui/checkbox"
@@ -308,6 +307,7 @@ const Index = () => {
         </Card>
       </div>
     </div>
+  </div>
   );
 };
 
