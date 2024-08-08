@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { QRCodeSVG } from 'qrcode.react';
 import * as QRCode from 'qrcode';
 import { Checkbox } from "@/components/ui/checkbox"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
