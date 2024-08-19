@@ -38,6 +38,7 @@ const Index = () => {
   const [nfcData, setNfcData] = useState(null);
   const [selectedQRFields, setSelectedQRFields] = useState({
     title: false,
+    issuerName: false,
     cardNumber: false,
     expirationDate: false,
     cardholderName: false,
@@ -194,6 +195,45 @@ const Index = () => {
               <CardDescription>Enter the details for your Google Wallet Pass</CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="mb-4">
+                <Label>QR Code Fields</Label>
+                <div className="space-y-2 mt-2">
+                  {Object.keys(selectedQRFields).map((field) => (
+                    <div key={field} className="flex items-center">
+                      <Checkbox
+                        id={`qr-${field}`}
+                        checked={selectedQRFields[field]}
+                        onCheckedChange={() => handleQRFieldChange(field)}
+                      />
+                      <label htmlFor={`qr-${field}`} className="ml-2 text-sm">
+                        {field.charAt(0).toUpperCase() + field.slice(1)}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <AnimatePresence>
+                {Object.keys(selectedQRFields).map((field) => 
+                  selectedQRFields[field] && (
+                    <motion.div
+                      key={field}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Label htmlFor={`qr-${field}-value`}>{field.charAt(0).toUpperCase() + field.slice(1)} for QR Code</Label>
+                      <Input
+                        id={`qr-${field}-value`}
+                        name={`qr-${field}-value`}
+                        value={passData[field]}
+                        onChange={(e) => setPassData(prev => ({ ...prev, [field]: e.target.value }))}
+                        className="mt-1 mb-2"
+                      />
+                    </motion.div>
+                  )
+                )}
+              </AnimatePresence>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {nfcSupported && (
                   <div className="mb-4">
@@ -271,45 +311,6 @@ const Index = () => {
                     <option value="pretty">Pretty QR Code (AI-generated)</option>
                   </select>
                 </div>
-                <div>
-                  <Label>QR Code Fields</Label>
-                  <div className="space-y-2">
-                    {Object.keys(selectedQRFields).map((field) => (
-                      <div key={field} className="flex items-center">
-                        <Checkbox
-                          id={`qr-${field}`}
-                          checked={selectedQRFields[field]}
-                          onCheckedChange={() => handleQRFieldChange(field)}
-                        />
-                        <label htmlFor={`qr-${field}`} className="ml-2 text-sm">
-                          {field.charAt(0).toUpperCase() + field.slice(1)}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <AnimatePresence>
-                  {Object.keys(selectedQRFields).map((field) => 
-                    selectedQRFields[field] && (
-                      <motion.div
-                        key={field}
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <Label htmlFor={`qr-${field}-value`}>{field.charAt(0).toUpperCase() + field.slice(1)} for QR Code</Label>
-                        <Input
-                          id={`qr-${field}-value`}
-                          name={`qr-${field}-value`}
-                          value={passData[field]}
-                          onChange={(e) => setPassData(prev => ({ ...prev, [field]: e.target.value }))}
-                          className="mt-1"
-                        />
-                      </motion.div>
-                    )
-                  )}
-                </AnimatePresence>
                 <div className="flex items-center space-x-2">
                   <Checkbox id="privacyAgreement" checked={privacyAgreed} onCheckedChange={setPrivacyAgreed} />
                   <label htmlFor="privacyAgreement" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
