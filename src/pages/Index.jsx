@@ -279,35 +279,35 @@ const Index = () => {
           </Card>
 
           <Card>
-          <CardHeader>
-            <CardTitle>Pass Preview</CardTitle>
-            <CardDescription>A simple preview of your pass</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="border rounded-lg p-4" style={{ backgroundColor: passData.backgroundColor, color: passData.textColor }}>
-              <h2 className="text-xl font-bold mb-2">{passData.title || 'Pass Title'}</h2>
-              <p className="text-sm mb-2">Issued by: {passData.issuerName || 'Issuer Name'}</p>
-              {passData.logo && <img src={passData.logo} alt="Logo" className="w-16 h-16 mb-2 mx-auto object-cover" />}
-              {passData.heroImage && <img src={passData.heroImage} alt="Hero" className="w-full h-32 mb-2 mx-auto object-cover" />}
-              <p className="text-sm">{passData.description || 'Pass description will appear here'}</p>
-              <div className="mt-4">
-                {qrCodeType === 'standard' ? (
-                  <QRCodeSVG value={generateQRCode()} size={128} className="mx-auto" />
-                ) : (
-                  <img
-                    src={generatePrettyQRCode()}
-                    alt="Pretty QR Code"
-                    className="mx-auto"
-                    style={{ width: '128px', height: '128px' }}
-                  />
-                )}
+            <CardHeader>
+              <CardTitle>Pass Preview</CardTitle>
+              <CardDescription>A simple preview of your pass</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-lg p-4" style={{ backgroundColor: passData.backgroundColor, color: passData.textColor }}>
+                <h2 className="text-xl font-bold mb-2">{passData.title || 'Pass Title'}</h2>
+                <p className="text-sm mb-2">Issued by: {passData.issuerName || 'Issuer Name'}</p>
+                {passData.logo && <img src={passData.logo} alt="Logo" className="w-16 h-16 mb-2 mx-auto object-cover" />}
+                {passData.heroImage && <img src={passData.heroImage} alt="Hero" className="w-full h-32 mb-2 mx-auto object-cover" />}
+                <p className="text-sm">{passData.description || 'Pass description will appear here'}</p>
+                <div className="mt-4">
+                  {qrCodeType === 'standard' ? (
+                    <QRCodeSVG value={generateQRCode()} size={128} className="mx-auto" />
+                  ) : (
+                    <img
+                      src={generatePrettyQRCode()}
+                      alt="Pretty QR Code"
+                      className="mx-auto"
+                      style={{ width: '128px', height: '128px' }}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
-  </div>
   );
 };
 
